@@ -1,53 +1,62 @@
-import json,os
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
+###     To-do list em python com painel rich     ###
+#   Esse script implementa uma lista de tarefas (to-do list) em Python utilizando a biblioteca Rich para exibir um painel interativo no terminal.
+#
+#   Esse script foi desenvolvido para estudar CRUD de dados simples e manipulação de arquivos JSON em Python.
+#   Autor: Erick Tavares
+# ###
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_PATH = os.path.join(BASE_DIR, "ToDo.json")
 
-class Lista:
+import json,os # Biblioteca para manipulação de JSON e operações do sistema
+from rich.console import Console # Biblioteca Rich para exibir painéis bonitos no terminal
+from rich.table import Table # Biblioteca Rich para criar tabelas no terminal
+from rich.panel import Panel    # Biblioteca Rich para criar painéis no terminal
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)); # Diretório base do script
+JSON_PATH = os.path.join(BASE_DIR, "ToDo.json"); # Caminho do arquivo JSON para armazenar a lista de tarefas
+
+class Lista: # Classe para gerenciar a lista de tarefas
     def __init__(self):
-        if JSON_PATH:
+        if JSON_PATH: # Verifica se o arquivo JSON existe
             with open(JSON_PATH, "r") as f:
-                self.list = json.load(f);
+                self.list = json.load(f); # Carrega a lista de tarefas do arquivo JSON caso exista
         else:
-            self.list = {};
+            self.list = {}; # Inicializa uma lista vazia se o arquivo JSON não existir
 
-    def add(self, nome, text):
+    def add(self, nome, text): # Função para adicionar uma nova tarefa
         self.list[nome] = [text, bool(False)];
-        self._salvar__();
+        self._salvar__();   # Salva a lista atualizada no arquivo JSON
 
-    def remove(self, nome):
-        if nome in ["all","tudo","todas","clear","delete","*"]:
-            self.list.clear();
-            self._salvar__();
-        elif nome in self.list:
-            del self.list[nome];
-            self._salvar__();
-        else:
+    def remove(self, nome): # Função para remover uma tarefa
+        if nome in ["all","tudo","todas","clear","delete","*"]: # Verifica se o usuário quer remover todas as tarefas
+            self.list.clear(); # Limpa toda a lista de tarefas
+            self._salvar__(); # Salva a lista vazia no arquivo JSON
+        elif nome in self.list: # Verifica se a tarefa existe na lista
+            del self.list[nome]; # Remove a tarefa da lista
+            self._salvar__();# Salva a lista vazia no arquivo JSON
+        else: # Se a tarefa não for encontrada
             print(f"Item '{nome}' não encontrado na lista.");
             raise KeyError(f"Item '{nome}' não encontrado na lista.");
 
     def show(self) -> list[str]:
+        #   Função que retorna todo o conteúdo da lista
         return [f"{nome}: {text[0]} : {'Feito' if text[1] else 'A fazer'}" for nome, text in self.list.items()];
 
-    def atualizar(self, nome):
-        if nome in self.list:
+    def atualizar(self, nome): # Função para atualizar o status de uma tarefa
+        if nome in self.list: # Verifica se a tarefa existe na lista
             self.list[nome][1] = not self.list[nome][1];
             self._salvar__();
-        else:
+        else: # Se a tarefa não for encontrada
             print(f"Item '{nome}' não encontrado na lista.");
             raise KeyError(f"Item '{nome}' não encontrado na lista.");
 
-    def _salvar__(self):
+    def _salvar__(self):  # Função interna para salvar a lista de tarefas no arquivo JSON
         with open(JSON_PATH, "w") as f:
             json.dump(self.list, f);
 
 def entrada(prompt: str):
     return input(prompt).strip().lower();
 
-def mostrarLista(lista: Lista, console: Console):
+def mostrarLista(lista: Lista, console: Console): # Função para exibir a lista de tarefas em um painel Rich
     table = Table(title="Lista de Tarefas")
     table.add_column("Nome", style="cyan", no_wrap=True)
     table.add_column("Descrição", style="magenta")
@@ -59,7 +68,7 @@ def mostrarLista(lista: Lista, console: Console):
 
     console.print(table)
 
-def criar():
+def criar(): # Função para criar uma nova tarefa
     console.print(Panel("[bold blue]Adicionar Nova Tarefa[/bold blue]"));
 
     nome = entrada("Nome da tarefa: ");
@@ -68,7 +77,7 @@ def criar():
     lista.add(nome, text);
     console.print(f"[green]Tarefa '{nome}' adicionada com sucesso![/green]");
 
-def remover():
+def remover(): # Função para remover uma tarefa
     console.print(Panel("[bold red]Remover Tarefa[/bold red]"));
 
     mostrar()
@@ -81,7 +90,7 @@ def remover():
     except KeyError as e:
         console.print(f"[red]{e}[/red]");
 
-def atualizar():
+def atualizar():    # Função para atualizar o status de uma tarefa
     console.print(Panel("[bold yellow]Atualizar Status da Tarefa[/bold yellow]"));
 
     mostrar()
@@ -94,11 +103,11 @@ def atualizar():
     except KeyError as e:
         console.print(f"[red]{e}[/red]");
 
-def mostrar():
+def mostrar():  # Função para mostrar a lista de tarefas
     console.print(Panel("[bold magenta]Lista de Tarefas[/bold magenta]"));
     mostrarLista(lista, console);
 
-def menu():
+def menu():  # Função para exibir o menu principal
     while True:
         console.print(Panel("""
 [bold cyan]MENU TO-DO[/bold cyan]
